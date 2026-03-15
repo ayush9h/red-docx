@@ -5,8 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "reddocx"                 
 version = "0.0.1"
-description = "Open source implementation for track changes engine for MS Word (.docx)"
-readme = "README.md"
+description = "Python library for programmatically creating Microsoft Word track-changes (insertions & deletions) via direct OOXML processing."
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.9"
 authors = [
     { name = "Ayush Kumar" }
@@ -19,8 +19,14 @@ dependencies = [
 keywords = ["docx", "word", "track-changes", "ooxml", "lxml"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent"
+    "Programming Language :: Python :: 3 :: Only",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Text Processing :: Markup :: XML",
+    "Topic :: Office/Business",
+    "Topic :: Software Development :: Libraries",
 ]
+
 
 [tool.setuptools.packages.find]
 where = ["src"]
