@@ -23,6 +23,18 @@ heavy document processing libraries.
 - Supports file path, bytes, or memory streams
 
 
+## How to use
+```bash
+from reddocx.core.document import DocxDocument
+doc = DocxDocument('sample.docx')
+updated_report = doc.track_replace_words({'original_word':'replaced_word'})
+updated_doc = doc.save()
+```
+
+
+
+
+
 ## Installation
 
  - Default Installation
