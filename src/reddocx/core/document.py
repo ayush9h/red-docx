@@ -64,55 +64,71 @@ class DocxDocument:
 
         return results
 
-    def _apply_revision(
-        self,
-        paragraph,
-        old_word,
-        new_word,
-        rev_id,
-        date,
-        author: Optional[str] = "John Doe",
-    ):
+    def _apply_revision(self, paragraph, old_word, new_word, rev_id, date, author):
         ns = NS["w"]
 
         for run in paragraph.xpath(".//w:r", namespaces=NS):
-            texts = run.xpath(".//w:t", namespaces=NS)
+            t = run.find(".//w:t", namespaces=NS)
 
-            for t in texts:
-                if t.text and old_word in t.text:
+            if t is None or t.text is None:
+                continue
 
-                    parent = run.getparent()
+            text = t.text
 
-                    # delete element
-                    del_el = etree.Element(f"{{{ns}}}del")
-                    del_el.set(f"{{{ns}}}id", str(rev_id))
-                    del_el.set(f"{{{ns}}}author", str(author))
-                    del_el.set(f"{{{ns}}}date", date)
+            if old_word not in text:
+                continue
 
-                    del_run = etree.Element(f"{{{ns}}}r")
-                    del_text = etree.Element(f"{{{ns}}}delText")
-                    del_text.text = old_word
+            before, match, after = text.partition(old_word)
 
-                    del_run.append(del_text)
-                    del_el.append(del_run)
+            parent = run.getparent()
+            idx = parent.index(run)
 
-                    # insert element
-                    ins_el = etree.Element(f"{{{ns}}}ins")
-                    ins_el.set(f"{{{ns}}}id", str(rev_id))
-                    ins_el.set(f"{{{ns}}}author", str(author))
-                    ins_el.set(f"{{{ns}}}date", date)
+            if before:
+                before_run = etree.Element(f"{{{ns}}}r")
+                before_t = etree.Element(f"{{{ns}}}t")
+                before_t.text = before
+                before_run.append(before_t)
+                parent.insert(idx, before_run)
+                idx += 1
 
-                    ins_run = etree.Element(f"{{{ns}}}r")
-                    ins_text = etree.Element(f"{{{ns}}}t")
-                    ins_text.text = new_word
+            # delete revision
+            del_el = etree.Element(f"{{{ns}}}del")
+            del_el.set(f"{{{ns}}}id", str(rev_id))
+            del_el.set(f"{{{ns}}}author", author)
+            del_el.set(f"{{{ns}}}date", date)
 
-                    ins_run.append(ins_text)
-                    ins_el.append(ins_run)
+            del_run = etree.Element(f"{{{ns}}}r")
+            del_text = etree.Element(f"{{{ns}}}delText")
+            del_text.text = old_word
+            del_run.append(del_text)
+            del_el.append(del_run)
 
-                    parent.replace(run, del_el)
-                    parent.insert(parent.index(del_el) + 1, ins_el)
+            parent.insert(idx, del_el)
+            idx += 1
 
-                    break
+            ins_el = etree.Element(f"{{{ns}}}ins")
+            ins_el.set(f"{{{ns}}}id", str(rev_id))
+            ins_el.set(f"{{{ns}}}author", author)
+            ins_el.set(f"{{{ns}}}date", date)
+
+            ins_run = etree.Element(f"{{{ns}}}r")
+            ins_text = etree.Element(f"{{{ns}}}t")
+            ins_text.text = new_word
+            ins_run.append(ins_text)
+            ins_el.append(ins_run)
+
+            parent.insert(idx, ins_el)
+            idx += 1
+
+            if after:
+                after_run = etree.Element(f"{{{ns}}}r")
+                after_t = etree.Element(f"{{{ns}}}t")
+                after_t.text = after
+                after_run.append(after_t)
+                parent.insert(idx, after_run)
+
+            parent.remove(run)
+            break
 
     def save(self) -> bytes:
 
