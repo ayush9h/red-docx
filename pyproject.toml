@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "reddocx"                 # change if publishing (must be unique on PyPI)
-version = "0.1.0"
-description = "Track changes engine for MS Word (.docx)"
+name = "reddocx"                 
+version = "0.0.1"
+description = "Open source implementation for track changes engine for MS Word (.docx)"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
@@ -16,7 +16,7 @@ dependencies = [
     "lxml-stubs>=0.5.1"
 ]
 
-keywords = ["docx", "word", "track-changes", "ooxml"]
+keywords = ["docx", "word", "track-changes", "ooxml", "lxml"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent"
@@ -24,6 +24,9 @@ classifiers = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[project.urls]
+Homepage = "https://github.com/ayush9h/red-docx"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
