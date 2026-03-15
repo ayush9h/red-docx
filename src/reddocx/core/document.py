@@ -1,9 +1,7 @@
-import os
-import shutil
-import tempfile
 import zipfile
+from datetime import datetime
 from io import BytesIO
-from typing import List, Union, cast
+from typing import List, Optional, Union, cast
 
 from lxml import etree
 
@@ -35,6 +33,86 @@ class DocxDocument:
     ) -> str:
         texts = cast(List, paragraph.xpath(".//w:t", namespaces=NS))
         return "".join(t.text for t in texts if t.text)
+
+    def track_replace_words(
+        self, replacements: dict[str, str], author: Optional[str] = "John DOE"
+    ):
+
+        results = {}
+        revision_id = 1
+        now = datetime.utcnow().isoformat() + "Z"
+
+        paragraphs = self.paragraphs()
+
+        for idx, p in enumerate(paragraphs):
+            text = self.get_paragraph_text(p)
+
+            for old, new in replacements.items():
+                if old in text:
+
+                    results.setdefault(old, []).append(idx)
+
+                    self._apply_revision(
+                        paragraph=p,
+                        old_word=old,
+                        new_word=new,
+                        rev_id=revision_id,
+                        date=now,
+                        author=author,
+                    )
+                    revision_id += 1
+
+        return results
+
+    def _apply_revision(
+        self,
+        paragraph,
+        old_word,
+        new_word,
+        rev_id,
+        date,
+        author: Optional[str] = "John Doe",
+    ):
+        ns = NS["w"]
+
+        for run in paragraph.xpath(".//w:r", namespaces=NS):
+            texts = run.xpath(".//w:t", namespaces=NS)
+
+            for t in texts:
+                if t.text and old_word in t.text:
+
+                    parent = run.getparent()
+
+                    # delete element
+                    del_el = etree.Element(f"{{{ns}}}del")
+                    del_el.set(f"{{{ns}}}id", str(rev_id))
+                    del_el.set(f"{{{ns}}}author", str(author))
+                    del_el.set(f"{{{ns}}}date", date)
+
+                    del_run = etree.Element(f"{{{ns}}}r")
+                    del_text = etree.Element(f"{{{ns}}}delText")
+                    del_text.text = old_word
+
+                    del_run.append(del_text)
+                    del_el.append(del_run)
+
+                    # insert element
+                    ins_el = etree.Element(f"{{{ns}}}ins")
+                    ins_el.set(f"{{{ns}}}id", str(rev_id))
+                    ins_el.set(f"{{{ns}}}author", str(author))
+                    ins_el.set(f"{{{ns}}}date", date)
+
+                    ins_run = etree.Element(f"{{{ns}}}r")
+                    ins_text = etree.Element(f"{{{ns}}}t")
+                    ins_text.text = new_word
+
+                    ins_run.append(ins_text)
+                    ins_el.append(ins_run)
+
+                    parent.replace(run, del_el)
+                    parent.insert(parent.index(del_el) + 1, ins_el)
+
+                    break
 
     def save(self) -> bytes:
 
