@@ -12,6 +12,41 @@ Lightweight track-changes engine for Microsoft Word (.docx) files using direct X
 (insertions and deletions) to Word documents without requiring Microsoft Word or
 heavy document processing libraries.
 
+## Installation
+
+ - Default Installation
+```bash
+pip install reddocx
+ ```
+ - UV installation
+ ```bash
+ uv pip install reddocx
+```
+
+
+## Usage
+```bash
+from reddocx.core.document import DocxDocument
+doc = DocxDocument('sample.docx')
+updated_report = doc.track_replace_words({'original_word':'replaced_word'})
+updated_doc = doc.save()
+```
+
+## Demo
+
+### Before → Original document
+
+<p align="center">
+  <img src="https://drive.google.com/uc?export=view&id=1RaZM0_r6Hmt16yZ078J95fMOal33tatv" width="900"/>
+</p>
+
+### After → Track changes applied by `reddocx`
+
+<p align="center">
+  <img src="https://drive.google.com/uc?export=view&id=1I99g2VKfX9OmvBmHFdlTpSj2nZ9w8Z9Y" width="900"/>
+</p>
+
+
 
 ## Features
 
@@ -22,25 +57,3 @@ heavy document processing libraries.
 - Lightweight and fast
 - Supports file path, bytes, or memory streams
 
-
-## How to use
-```bash
-from reddocx.core.document import DocxDocument
-doc = DocxDocument('sample.docx')
-updated_report = doc.track_replace_words({'original_word':'replaced_word'})
-updated_doc = doc.save()
-```
-
-
-
-
-
-## Installation
-
- - Default Installation
-```bash
-pip install reddocx
- ```
- - UV installation
- ```bash
- uv pip install reddocx
